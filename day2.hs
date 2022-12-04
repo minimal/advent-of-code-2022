@@ -1,15 +1,13 @@
 --{-# LANGUAGE OverloadedStrings #-}
 
 scoreRound :: String -> Int
-scoreRound ['A',_,'X'] = 1 + 3
-scoreRound ['A',_,'Y'] = 2 + 6
-scoreRound ['A',_,'Z'] = 3 + 0
-scoreRound ['B',_,'X'] = 1 + 0
-scoreRound ['B',_,'Y'] = 2 + 3
-scoreRound ['B',_,'Z'] = 3 + 6
-scoreRound ['C',_,'X'] = 1 + 6
-scoreRound ['C',_,'Y'] = 2 + 0
-scoreRound ['C',_,'Z'] = 3 + 3
+scoreRound [a, _, b] =
+  let a' = fromJust $ elemIndex a "ABC"
+      b' = fromJust $ elemIndex b "XYZ"
+   in b' + 1 + case (b' - a') `mod` 3 of
+        1 -> 6
+        0 -> 3
+        _ -> 0
 
 scoreRound2 :: String -> Int
 scoreRound2 ['A',_,'X'] = 3 + 0
