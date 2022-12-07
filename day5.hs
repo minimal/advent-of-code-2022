@@ -32,13 +32,13 @@ main = do
       let (stacks' : moves : _) = splitOn [""] rows
           stacks = take (length stacks' - 1) stacks'
           colWidths = map (colWidth . length) stacks
-          stackLetters = trimCrates colWidths stacks
+          stackLetters = zipWith getRowCrates colWidths stacks
           nCols = maximum $ map length stackLetters
           transposed = map (filter isAlpha) $ transpose stackLetters nCols
           finalStacks = foldl doMove transposed (map parseMove moves)
-       in map head finalStacks
+          finalStacks2 = foldl doMove2 transposed (map parseMove moves)
+       in (map head finalStacks, map head finalStacks2)
     colWidth n = (n + 1) `div` 4
-    trimCrates = zipWith getRowCrates
     getRowCrates width row = map (getCrate row) [0 .. width - 1]
     doMove :: [[a]] -> Move -> [[a]]
     doMove stacks (Move n from to) =
@@ -48,6 +48,10 @@ main = do
           let newToVal = head (stacks !! from) : (stacks !! to)
               newFromVal = tail (stacks !! from)
            in doMove (updateList from newFromVal $ updateList to newToVal stacks) (Move (n - 1) from to)
+    doMove2 stacks (Move n from to) =
+      let newToVal = take n (stacks !! from) ++ (stacks !! to)
+          newFromVal = drop n (stacks !! from)
+       in (updateList from newFromVal $ updateList to newToVal stacks)
     getCrate row n = row !! (((n + 1) * 4) - 3)
     transpose rows ncols = map (bleh rows) [0 .. (ncols - 1)]
     bleh rows idx = foldr (pluck idx) [] rows
