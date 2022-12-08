@@ -32,18 +32,34 @@ isVisible grid (x, y)
           rightClear = all (< tree) rights
        in aboveClear || belowClear || leftClear || rightClear
 
+scenicScore :: [[Int]] -> (Int, Int) -> Int
+scenicScore grid (x, y) =
+  let tree = getTree grid (x, y)
+      aboves = map (curry (getTree grid) x) [0 .. y - 1]
+      aboveScore' = length $ takeWhile (< tree) $ reverse aboves
+      aboveScore = if aboveScore' < length aboves then aboveScore' + 1 else aboveScore'
+
+      belows = map (curry (getTree grid) x) [y + 1 .. height grid - 1]
+      belowScore' = length $ takeWhile (< tree) belows
+      belowScore = if belowScore' < length belows then belowScore' + 1 else belowScore'
+      lefts = zipWith (curry (getTree grid)) [0 .. x - 1] (repeat y)
+      leftScore' = length $ takeWhile (< tree) $ reverse lefts
+      leftScore = if leftScore' < length lefts then leftScore' + 1 else leftScore'
+      rights = zipWith (curry (getTree grid)) [x + 1 .. width grid - 1] (repeat y)
+      rightScore' = length $ takeWhile (< tree) rights
+      rightScore = if rightScore' < length rights then rightScore' + 1 else rightScore'
+   in aboveScore * belowScore * leftScore * rightScore
+
 getTree :: [[a]] -> (Int, Int) -> a
 getTree grid (x, y) = (grid !! y) !! x
 
 main :: IO ()
 main = do
-  input <- readFile "input/day8.txt"
-  -- input <- readFile "input/sample8.txt" --21
+  input <- readFile "input/day8.txt" -- 1700,470596
+  -- input <- readFile "input/sample8.txt" -- 21,8
   let grid = map intGrid $ lines input
       ys = zipWith const [0 ..] grid
       xs = zipWith const [0 ..] (head grid)
       allCoords = [(x, y) | x <- xs, y <- ys]
-      tst = (1, 1)
-  print $ getTree grid tst
-  print $ isVisible grid tst
-  print $ length $ filter id $ map (isVisible grid) allCoords
+  print $ scenicScore grid (2, 3)
+  print $ maximum $ map (scenicScore grid) allCoords
