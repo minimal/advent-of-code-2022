@@ -61,5 +61,5 @@ main = do
       ys = zipWith const [0 ..] grid
       xs = zipWith const [0 ..] (head grid)
       allCoords = [(x, y) | x <- xs, y <- ys]
-  print $ scenicScore grid (2, 3)
+  print $ length $ filter id $ map (isVisible grid) allCoords
   print $ maximum $ map (scenicScore grid) allCoords
