@@ -1,11 +1,10 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-import Data.Char (isAlpha, isDigit)
 import Data.List.Split (splitOn)
 import Data.Map (Map ())
+import Data.Map.Strict ((!))
 import qualified Data.Map.Strict as Map
 import Data.Maybe (fromJust)
-import Debug.Trace (trace, traceShow)
 
 data Line
   = CD String
@@ -26,11 +25,11 @@ fullPath :: [String] -> String -> String
 fullPath dirs curdir = foldl (++) curdir dirs
 
 walk2 :: Map String Int -> [String] -> String -> [Line] -> Map String Int
-walk2 lookup (parDir : pardirs) curDir [] = Map.adjust (+ Map.findWithDefault 0 (fullPath (parDir : pardirs) curDir) lookup) parDir lookup
+walk2 lookup (parDir : pardirs) curDir [] = Map.adjust (+ lookup ! fullPath (parDir : pardirs) curDir) parDir lookup
 walk2 lookup dirs curDir ((CD dir) : ls)
   | dir == ".." =
       let (parDir : pardirs) = dirs
-       in walk2 (Map.adjust (+ Map.findWithDefault 0 (fullPath dirs curDir) lookup) (fullPath pardirs parDir) lookup) pardirs parDir ls
+       in walk2 (Map.adjust (+ lookup ! fullPath dirs curDir) (fullPath pardirs parDir) lookup) pardirs parDir ls
   | otherwise =
       walk2 (Map.insert (fullPath (curDir : dirs) dir) 0 lookup) (curDir : dirs) dir ls
 walk2 lookup parDir curDir (Ls : ls) = walk2 lookup parDir curDir ls
